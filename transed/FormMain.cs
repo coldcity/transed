@@ -6,14 +6,15 @@ using System.IO;
 
 namespace Transed {
     public partial class MainForm : Form {
-        UndoRedoStack undoRedoStack = new UndoRedoStack();
-        string filename;
-        string fileLocation;
-        bool isDirty;
-        bool isNewfile;
-        bool captureChangesToUndoStack = true;
-        Timer undoCaptureTimer = new Timer();
+        UndoRedoStack undoRedoStack = new UndoRedoStack();      // Double stack to track undo/redo steps
+        string filename;                                        // Current filename
+        string fileLocation;                                    // Current full path filename
+        bool isDirty;                                           // Flag to indicate file has changed without save
+        bool isNewfile;                                         // Flag to indicate file has never been saved
+        bool captureChangesToUndoStack = true;                  // Flag to gate whether undo/redo stacks are capturing
+        Timer undoCaptureTimer = new Timer();                   // Timer to fire state-capture for undo/redo
 
+        // Substitution dictionary
         Dictionary<string, string> subs = new Dictionary<string, string>() {
             // Replace
             { "E", "Ꜣ" }, { "e", "ꜣ" },
@@ -40,6 +41,7 @@ namespace Transed {
             { "Z", "" }, { "z", "" }
         };
 
+        // Constructor
         public MainForm() {
             InitializeComponent();
             NewFile();
@@ -47,6 +49,7 @@ namespace Transed {
             undoCaptureTimer.Interval = 500;
         }
 
+        // Update window title and menuitem enable states
         private void UpdateView() {
             this.Text = isDirty ? filename + "*" : filename;
             this.Text += " | Egyptian Hieroglyph Transliteration Pad";
@@ -54,6 +57,7 @@ namespace Transed {
             redoEditMenu.Enabled = undoRedoStack.CanRedo() ? true : false;
         }
 
+        // Init a new file
         private void NewFile() {
             txtArea.Text = "";
             filename = "Untitled.txt";
@@ -62,6 +66,7 @@ namespace Transed {
             UpdateView();
         }
 
+        // Read given file from disk, and update fileLocation
         private string ReadFile(string newFileLocation) {
             string content;
             fileLocation = newFileLocation;
@@ -72,6 +77,7 @@ namespace Transed {
             return content;
         }
 
+        // Write file to disk, and update fileLocation
         private void WriteFile(string newFileLocation, string[] lines) {
             fileLocation = newFileLocation;
             Stream stream = File.Open(fileLocation, FileMode.OpenOrCreate, FileAccess.Write);
@@ -82,6 +88,7 @@ namespace Transed {
             UpdateView();
         }
 
+        // Save File, or divert to Save As for a new file
         private void SaveFile() {
             if (isNewfile)
                 SaveFileAs();
@@ -89,6 +96,7 @@ namespace Transed {
                 WriteFile(fileLocation, txtArea.Lines);
         }
 
+        // Save File As
         private void SaveFileAs() {
             SaveFileDialog fileSave = new SaveFileDialog();
             fileSave.Filter = "Text(*.txt)|*.txt";
@@ -96,24 +104,27 @@ namespace Transed {
                 WriteFile(fileSave.FileName, txtArea.Lines);
         }
 
+        // Allow user to save or cancel before a buffer-nuking action
         private bool OKToProceedWhileDirty() {
-            if (!isDirty) return true;
+            if (!isDirty) return true;                  // Not dirty? Always fine
 
             DialogResult result = MessageBox.Show("Save changes to " + filename + " first?", "Transed", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-            if (result == DialogResult.Cancel)
+            if (result == DialogResult.Cancel)          // Cancelled? Not fine
                 return false;
-            else if (result == DialogResult.Yes)
+            else if (result == DialogResult.Yes)        // Save, then fine
                 SaveFile();
 
             return true;
         }
 
+        // Update filename and flags after a read/write
         private void UpdateFileStatus() {
             filename = fileLocation.Substring(fileLocation.LastIndexOf("\\") + 1);
             isDirty = false;
             isNewfile = false;
         }
 
+        // Update statusbar
         private void UpdateStatus() {
             int pos = txtArea.SelectionStart;
             int line = txtArea.GetLineFromCharIndex(pos) + 1;
@@ -122,7 +133,8 @@ namespace Transed {
             status.Text = "Ln " + line + ", Col " + col;
         }
 
-        // *************** Event Handlers ***************
+        // ****************************** Event Handlers ******************************
+
         private void undoCaptureTimer_Tick(object sender, EventArgs e) {
             undoCaptureTimer.Stop();
             undoRedoStack.AddItem(txtArea.Text);
@@ -162,9 +174,9 @@ namespace Transed {
             openFile.InitialDirectory = "D:";
             openFile.Title = "Open File";
             if (openFile.ShowDialog() == DialogResult.OK) {
-                txtArea.TextChanged -= txtArea_TextChanged;
+                //txtArea.TextChanged -= txtArea_TextChanged;     // Disconnect...
                 txtArea.Text = ReadFile(openFile.FileName);
-                txtArea.TextChanged += txtArea_TextChanged;
+                //txtArea.TextChanged += txtArea_TextChanged;     // ...reconnect
                 UpdateView();
             }
         }
@@ -268,7 +280,7 @@ namespace Transed {
 
         private void viewHelpToolStripMenuItem_Click(object sender, EventArgs e) {
             HelpForm f = new HelpForm();
-            f.Show();
+            f.Show();                                           // Show this one non-modal; it's a handy reference
         }
 
         private void aboutHelpMenuItem_Click(object sender, EventArgs e) {

@@ -48,7 +48,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icon-app.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
@@ -132,9 +133,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Abydos-Bold-hieroglyph-Y3.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="icon-app.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
