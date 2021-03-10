@@ -33,4 +33,4 @@ d_ / j ⟶ ḏ
 
 **NOTE:** You can show this list in the program via Help -> Typing Transliterals.
 
-In addition, numerals are converted to uppercase, and alpha characters not used in transliteration are ignored.
+In addition, numerals are converted to superscript, and alpha characters not used in transliteration are ignored.
