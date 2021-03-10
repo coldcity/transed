@@ -10,6 +10,7 @@ namespace Transed {
         string filename;
         string fileLocation;
         bool isDirty;
+        bool isNewfile;
         bool captureChangesToUndoStack = true;
         Timer undoCaptureTimer = new Timer();
 
@@ -58,6 +59,7 @@ namespace Transed {
             txtArea.Text = "";
             filename = "Untitled.txt";
             isDirty = false;
+            isNewfile = true;
             UpdateView();
         }
 
@@ -82,7 +84,7 @@ namespace Transed {
         }
 
         private void SaveFile() {
-            if (filename == "Untitled.txt")
+            if (isNewfile)
                 SaveFileAs();
             else
                 WriteFile(fileLocation, txtArea.Lines);
@@ -95,9 +97,30 @@ namespace Transed {
                 WriteFile(fileSave.FileName, txtArea.Lines);
         }
 
+        private bool OKToProceedWhileDirty() {
+            if (!isDirty) return true;
+
+            DialogResult result = MessageBox.Show("Save changes to " + filename + " first?", "Transed", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (result == DialogResult.Cancel)
+                return false;
+            else if (result == DialogResult.Yes)
+                SaveFile();
+
+            return true;
+        }
+
         private void UpdateFileStatus() {
             filename = fileLocation.Substring(fileLocation.LastIndexOf("\\") + 1);
             isDirty = false;
+            isNewfile = false;
+        }
+
+        private void UpdateStatus() {
+            int pos = txtArea.SelectionStart;
+            int line = txtArea.GetLineFromCharIndex(pos) + 1;
+            int col = pos - txtArea.GetFirstCharIndexOfCurrentLine() + 1;
+
+            status.Text = "Ln " + line + ", Col " + col;
         }
 
         // *************** Event Handlers ***************
@@ -124,18 +147,6 @@ namespace Transed {
             if (captureChangesToUndoStack)
                 undoCaptureTimer.Start();
             UpdateView();
-        }
-
-        private bool OKToProceedWhileDirty() {
-            if (!isDirty) return true;
-
-            DialogResult result = MessageBox.Show("Save changes to " + filename + " first?", "Transed", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-            if (result == DialogResult.Cancel)
-                return false;
-            else if (result == DialogResult.Yes)
-                SaveFile();
-
-            return true;
         }
 
         private void newFileMenu_Click(object sender, System.EventArgs e) {
@@ -254,14 +265,6 @@ namespace Transed {
 
         private void txtArea_SelectionChanged(object sender, EventArgs e) {
             UpdateStatus();
-        }
-
-        private void UpdateStatus() {
-            int pos = txtArea.SelectionStart;
-            int line = txtArea.GetLineFromCharIndex(pos) + 1;
-            int col = pos - txtArea.GetFirstCharIndexOfCurrentLine() + 1;
-
-            status.Text = "Ln " + line + ", Col " + col;
         }
 
         private void viewHelpToolStripMenuItem_Click(object sender, EventArgs e) {
