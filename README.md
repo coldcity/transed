@@ -3,6 +3,10 @@
 
 **A simple Notepad-like editor for transliterating Egyptian hieroglyphs**
 
+![Dark mode](/screenshots/transed-screenie-1.png?raw=true "Dark mode")
+
+![Light mode](/screenshots/transed-screenie-2.png?raw=true "Light mode")
+
 The following substitutions happen automatically
 when typing or loading a file:
 
