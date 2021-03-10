@@ -1,7 +1,8 @@
-# Transed
-## By Fell, 2021
+# Transed by Fell, 2021
 
 **A simple Notepad-like editor for transliterating Egyptian hieroglyphs**
+
+Get the latest Windows build from the [releases page](https://github.com/coldcity/transed/releases)!
 
 The following substitutions happen automatically
 when typing or loading a file:
